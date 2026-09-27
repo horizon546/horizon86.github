@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>火影忍者手游武斗赛BP工具</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei",-apple-system,sans-serif;background:#0d1117;color:#e6edf3;padding:12px;min-height:100vh}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;background:#161b22;padding:10px;border-radius:10px;border:1px solid #30363d}
+h1{font-size:16px;color:#f0c040;margin-right:4px;white-space:nowrap}
+.name-input{background:#0d1117;border:1px solid #30363d;color:#fff;padding:7px 10px;border-radius:6px;width:130px;font-size:13px;outline:none}
+.name-input.blue{border-color:#2a6fdb}
+.name-input.red{border-color:#db2a2a}
+.name-input:focus{border-color:#58a6ff}
+#status{flex:1;background:#0d1117;padding:8px 12px;border-radius:6px;font-weight:bold;color:#58a6ff;min-width:180px;font-size:13px;border:1px solid #30363d}
+button{background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s;white-space:nowrap}
+button:hover{background:#30363d}
+button.primary{background:#238636;border-color:#2ea043}
+button.primary:hover{background:#2ea043}
+button.danger{background:#a03030;border-color:#c04040}
+button.danger:hover{background:#c04040}
+button.avatar-btn{background:#6f42c1;border-color:#8957e5}
+button.avatar-btn:hover{background:#8957e5}
+button.avatar-btn.active{background:#f0c040;color:#0d1117;border-color:#f0c040;font-weight:bold}
+label.file-btn{background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:7px 12px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s;display:inline-block}
+label.file-btn:hover{background:#30363d}
+main{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.side{background:#161b22;border-radius:10px;padding:12px;border:2px solid transparent}
+.side.blue{border-color:#2a6fdb}
+.side.red{border-color:#db2a2a}
+.side h2{font-size:14px;margin-bottom:10px;text-align:center;padding-bottom:8px;border-bottom:1px solid #30363d}
+.side h2.blue{color:#58a6ff}
+.side h2.red{color:#ff7b72}
+.slot-row{margin:8px 0}
+.slot-row>b{color:#8b949e;font-size:12px;display:block;margin-bottom:4px}
+.mini-grid{display:flex;flex-wrap:wrap;gap:5px;min-height:26px}
+.mini-card{width:44px;height:44px;border-radius:6px;background:#0d1117;border:2px solid #30363d;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+.mini-card img{width:100%;height:100%;object-fit:cover}
+.mini-card.ban{border-color:#a03030;opacity:.75}
+.mini-card.pick-blue{border-color:#2a6fdb}
+.mini-card.pick-red{border-color:#db2a2a}
+.pool{background:#161b22;border-radius:10px;padding:12px;border:1px solid #30363d}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tab{padding:7px 16px;font-size:13px}
+.tab.active{background:#1f6feb;color:#fff;border-color:#1f6feb}
+.filters{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.filters input,.filters select{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:7px 10px;border-radius:6px;font-size:13px;outline:none}
+.filters input{flex:1;min-width:150px}
+.filters input:focus,.filters select:focus{border-color:#58a6ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:460px;overflow-y:auto;padding-right:4px}
+.card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:7px 4px;cursor:pointer;text-align:center;position:relative;font-size:11px;transition:.15s;overflow:hidden}
+.card:hover{background:#1c2128;transform:translateY(-2px);border-color:#58a6ff}
+.card.used{opacity:.35;cursor:not-allowed;filter:grayscale(.8)}
+.card.used:hover{transform:none;border-color:#30363d}
+.card.avatar-mode{cursor:crosshair;border-color:#8957e5}
+.card.avatar-mode:hover{border-color:#f0c040;box-shadow:0 0 10px rgba(240,192,64,.4)}
+.card .thumb{width:64px;height:64px;margin:0 auto 5px;border-radius:6px;overflow:hidden;background:#161b22;display:flex;align-items:center;justify-content:center}
+.card .thumb img{width:100%;height:100%;object-fit:cover}
+.card .name{font-weight:bold;line-height:1.2;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:26px;word-break:break-all}
+.card .rank{color:#8b949e;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .badge{position:absolute;top:3px;right:3px;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:bold;z-index:2}
+.badge.ban{background:#a03030;color:#fff}
+.badge.blue{background:#2a6fdb;color:#fff}
+.badge.red{background:#db2a2a;color:#fff}
+.badge.blue+.badge.red{top:22px}
+.history-panel{background:#161b22;border-radius:10px;padding:12px;margin-top:12px;border:1px solid #30363d}
+.history-panel h3{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;color:#f0c040}
+.history-item{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;font-size:12px;transition:.15s}
+.history-item:hover{background:#1c2128;border-color:#58a6ff}
+.history-time{color:#8b949e;font-size:11px}
+.history-names{font-weight:bold;color:#f0c040;margin:3px 0}
+.history-summary{color:#8b949e;font-size:11px;line-height:1.5}
+.history-actions{margin-top:6px;display:flex;gap:6px}
+.history-actions button{font-size:11px;padding:3px 8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:99;padding:16px}
+.modal.show{display:flex}
+.modal-content{background:#161b22;padding:20px;border-radius:12px;width:380px;max-width:100%;display:flex;flex-direction:column;gap:12px;border:1px solid #30363d;max-height:90vh;overflow-y:auto}
+.modal-content h3{font-size:16px;color:#f0c040}
+.modal-content label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#8b949e}
+.modal-content input,.modal-content select{background:#0d1117;border:1px solid #30363d;color:#e6edf3;padding:9px;border-radius:6px;font-size:13px;outline:none;width:100%}
+.modal-content input:focus,.modal-content select:focus{border-color:#58a6ff}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+.preview-img{width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid #30363d;margin-top:6px;align-self:center}
+.hint{font-size:11px;color:#6e7681;line-height:1.5;margin-top:4px}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0d1117}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#484f58}
+@media (max-width:720px){
+  main{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));max-height:340px}
+  .card .thumb{width:54px;height:54px}
+  h1{font-size:14px}
+  .name-input{flex:1;min-width:0;width:auto}
+  #status{order:99;flex-basis:100%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔥 武斗赛BP</h1>
+  <input id="blueNameInput" class="name-input blue" placeholder="蓝方选手" oninput="setPlayerName('blue',this.value)">
+  <input id="redNameInput" class="name-input red" placeholder="红方选手" oninput="setPlayerName('red',this.value)">
+  <div id="status">准备开始</div>
+  <button id="avatarModeBtn" class="avatar-btn" onclick="toggleAvatarMode()">🖼 设置头像</button>
+  <button class="primary" onclick="saveBPHistory()">保存记录</button>
+  <button onclick="resetBP()">重置BP</button>
+  <button onclick="openAddModal()">+ 添加内容</button>
+  <button onclick="exportData()">导出数据</button>
+  <label class="file-btn">导入数据<input type="file" hidden accept=".json" onchange="importData(event)"></label>
+</header>
+
+<main>
+  <div class="side blue">
+    <h2 class="blue" id="blueTitle">蓝方</h2>
+    <div class="slot-row"><b>禁用忍者</b><div class="mini-grid" id="blueBansGrid"></div></div>
+    <div class="slot-row"><b>出战忍者</b><div class="mini-grid" id="bluePicksGrid"></div></div>
+    <div class="slot-row"><b>秘卷</b><div class="mini-grid" id="blueScrollsGrid"></div></div>
+    <div class="slot-row"><b>通灵</b><div class="mini-grid" id="blueSummonsGrid"></div></div>
+  </div>
+  <div class="side red">
+    <h2 class="red" id="redTitle">红方</h2>
+    <div class="slot-row"><b>禁用忍者</b><div class="mini-grid" id="redBansGrid"></div></div>
+    <div class="slot-row"><b>出战忍者</b><div class="mini-grid" id="redPicksGrid"></div></div>
+    <div class="slot-row"><b>秘卷</b><div class="mini-grid" id="redScrollsGrid"></div></div>
+    <div class="slot-row"><b>通灵</b><div class="mini-grid" id="redSummonsGrid"></div></div>
+  </div>
+</main>
+
+<section class="pool">
+  <div class="tabs">
+    <button class="tab active" data-tab="ninjas" onclick="switchTab('ninjas')">忍者</button>
+    <button class="tab" data-tab="scrolls" onclick="switchTab('scrolls')">秘卷</button>
+    <button class="tab" data-tab="summons" onclick="switchTab('summons')">通灵</button>
+  </div>
+  <div class="filters">
+    <input id="search" placeholder="搜索名称..." oninput="renderPool()">
+    <select id="rankFilter" onchange="renderPool()">
+      <option value="">全部等级</option>
+      <option value="S">S级</option>
+      <option value="A">A级</option>
+      <option value="B">B级</option>
+      <option value="C">C级</option>
+    </select>
+  </div>
+  <div id="poolGrid" class="grid"></div>
+</section>
+
+<section class="history-panel">
+  <h3>BP历史记录 <button class="danger" style="font-size:11px;padding:4px 10px" onclick="clearHistory()">清空</button></h3>
+  <div id="historyList"></div>
+</section>
+
+<!-- 添加内容弹窗 -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <h3>添加新内容</h3>
+    <label>类型
+      <select id="addType" onchange="updateAddForm()">
+        <option value="ninja">忍者</option>
+        <option value="scroll">秘卷</option>
+        <option value="summon">通灵</option>
+      </select>
+    </label>
+    <label>名称
+      <input id="addName" placeholder="如：漩涡鸣人「仙人模式」">
+    </label>
+    <div id="addExtra"></div>
+    <label>图片（可选，建议100×100以内）
+      <input type="file" id="addImage" accept="image/*" onchange="previewImage(event)">
+      <img id="imagePreview" class="preview-img" style="display:none">
+    </label>
+    <div class="modal-actions">
+      <button onclick="closeAddModal()">取消</button>
+      <button class="primary" onclick="addItem()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 头像设置弹窗 -->
+<div id="avatarModal" class="modal">
+  <div class="modal-content">
+    <h3>设置头像</h3>
+    <div id="avatarItemInfo" style="color:#f0c040;font-size:14px"></div>
+    <label>📁 上传本地图片
+      <input type="file" id="avatarFile" accept="image/*" onchange="previewAvatar(event)">
+    </label>
+    <label>🔗 或输入图片URL / 相对路径
+      <input id="avatarUrl" placeholder="https://... 或 images/xxx.png" oninput="previewAvatarUrl(this.value)">
+    </label>
+    <img id="avatarPreview" class="preview-img" style="display:none">
+    <div class="hint">
+      💡 图片多时建议放在 HTML 同目录的 <b>images</b> 文件夹，填相对路径如 <code>images/naruto1.png</code>，不占浏览器存储空间。
+    </div>
+    <div class="modal-actions">
+      <button class="danger" onclick="clearAvatar()">清除头像</button>
+      <button onclick="closeAvatarModal()">取消</button>
+      <button class="primary" onclick="saveAvatar()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================== 默认数据 ==================== */
+/* 注意：已修复原代码中 n38~n62 在S级与A级重复的ID问题 */
+const DEFAULT_NINJAS = [
+  // ===== S级 n1 ~ n62 =====
+  {id:"n1",name:"宇智波鼬[秽土转生]",rank:"S"},
+  {id:"n2",name:"佩恩[天道]",rank:"S"},
+  {id:"n3",name:"大蛇丸[传说中的三忍]",rank:"S"},
+  {id:"n4",name:"宇智波鼬[晓·朱]",rank:"S"},
+  {id:"n5",name:"大筒木浦式[异星钓者]",rank:"S"},
+  {id:"n6",name:"漩涡鸣人·自来也[修行之旅]",rank:"S"},
+  {id:"n7",name:"纲手[传说中的三忍]",rank:"S"},
+  {id:"n8",name:"宇智波带土[十尾人柱力]",rank:"S"},
+  {id:"n9",name:"漩涡鸣人·宇智波佐助",rank:"S"},
+  {id:"n10",name:"漩涡鸣人[九喇嘛连结]",rank:"S"},
+  {id:"n11",name:"宇智波斑[五影会谈]",rank:"S"},
+  {id:"n12",name:"波风水门[九喇嘛连结]",rank:"S"},
+  {id:"n13",name:"烈斗[初代目风影]",rank:"S"},
+  {id:"n14",name:"漩涡鸣人[暴怒·第六尾]",rank:"S"},
+  {id:"n15",name:"自来也[传说中的三忍]",rank:"S"},
+  {id:"n16",name:"大筒木舍人[最终章]",rank:"S"},
+  {id:"n17",name:"旗木卡卡西[须佐能乎]",rank:"S"},
+  {id:"n18",name:"宇智波止水[须佐能乎]",rank:"S"},
+  {id:"n19",name:"艾[忍界大战]",rank:"S"},
+  {id:"n20",name:"大筒木桃式",rank:"S"},
+  {id:"n21",name:"宇智波斑[秽土转生·解]",rank:"S"},
+  {id:"n22",name:"千手柱间[木叶创立]",rank:"S"},
+  {id:"n23",name:"宇智波佐助[永恒万花筒]",rank:"S"},
+  {id:"n24",name:"春野樱[忍界大战]",rank:"S"},
+  {id:"n25",name:"大筒木金式",rank:"S"},
+  {id:"n26",name:"三代目风影[秽土转生]",rank:"S"},
+  {id:"n27",name:"大野木[忍界大战]",rank:"S"},
+  {id:"n28",name:"迈特凯[死门]",rank:"S"},
+  {id:"n29",name:"宇智波斑[木叶创立]",rank:"S"},
+  {id:"n30",name:"宇智波带土[忍界大战]",rank:"S"},
+  {id:"n31",name:"千手柱间[秽土转生]",rank:"S"},
+  {id:"n32",name:"罗砂[四代目风影]",rank:"S"},
+  {id:"n33",name:"自来也[舞之豪杰]",rank:"S"},
+  {id:"n34",name:"佩恩·天道[超]",rank:"S"},
+  {id:"n35",name:"药师兜[仙人模式]",rank:"S"},
+  {id:"n36",name:"宇智波斑[秽土转生]",rank:"S"},
+  {id:"n37",name:"艾[三代目雷影]",rank:"S"},
+  {id:"n38",name:"宇智波斑[白面具]",rank:"S"},
+  {id:"n39",name:"半藏[秽土转生]",rank:"S"},
+  {id:"n40",name:"千手扉间[秽土转生]",rank:"S"},
+  {id:"n41",name:"纲手[百豪]",rank:"S"},
+  {id:"n42",name:"无[二代目土影]",rank:"S"},
+  {id:"n43",name:"波风水门[秽土转生]",rank:"S"},
+  {id:"n44",name:"金角·银角[秽土转生]",rank:"S"},
+  {id:"n45",name:"猿飞日斩[秽土转生]",rank:"S"},
+  {id:"n46",name:"长门[秽土转生]",rank:"S"},
+  {id:"n47",name:"鬼灯幻月[二代目水影]",rank:"S"},
+  {id:"n48",name:"大野木[三代目土影]",rank:"S"},
+  {id:"n49",name:"宇智波斑",rank:"S"},
+  {id:"n50",name:"千手柱间",rank:"S"},
+  {id:"n51",name:"艾[四代目雷影]",rank:"S"},
+  {id:"n52",name:"千手扉间",rank:"S"},
+  {id:"n53",name:"自来也[仙人模式]",rank:"S"},
+  {id:"n54",name:"神秘面具男",rank:"S"},
+  {id:"n55",name:"宇智波鼬[须佐能乎]",rank:"S"},
+  {id:"n56",name:"猿飞日斩",rank:"S"},
+  {id:"n57",name:"波风水门",rank:"S"},
+  {id:"n58",name:"大蛇丸",rank:"S"},
+  {id:"n59",name:"自来也",rank:"S"},
+  {id:"n60",name:"纲手",rank:"S"},
+  {id:"n61",name:"宇智波斑[神驹佑将]",rank:"S"},
+  {id:"n62",name:"神秘面具男[红夜之刃]",rank:"S"},
+
+  // ===== A级 n63 ~ n132 =====
+  {id:'n63',name:'波风水门「新春限定」',rank:'A'},
+  {id:'n64',name:'达鲁伊「博人传」',rank:'A'},
+  {id:'n65',name:'迪达拉',rank:'A'},
+  {id:'n66',name:'飞段',rank:'A'},
+  {id:'n67',name:'飞段「死司凭血」',rank:'A'},
+  {id:'n68',name:'干柿鬼鲛',rank:'A'},
+  {id:'n69',name:'干柿鬼鲛「鲛肌融合」',rank:'A'},
+  {id:'n70',name:'漩涡博人「桃式显现」',rank:'A'},
+  {id:'n71',name:'机械鸣人「初始形态」',rank:'A'},
+  {id:'n72',name:'迈特凯',rank:'A'},
+  {id:'n73',name:'桃地再不斩「秽土转生」',rank:'A'},
+  {id:'n74',name:'桃地再不斩「漂泊武士」',rank:'A'},
+  {id:'n75',name:'我爱罗「疾风传」',rank:'A'},
+  {id:'n76',name:'我爱罗「忍界大战」',rank:'A'},
+  {id:'n77',name:'蝎',rank:'A'},
+  {id:'n78',name:'蝎「绯流琥」',rank:'A'},
+  {id:'n79',name:'小南',rank:'A'},
+  {id:'n80',name:'小南「漂泊浪客」',rank:'A'},
+  {id:'n81',name:'小南「神驹佑将」',rank:'A'},
+  {id:'n82',name:'猿飞阿斯玛',rank:'A'},
+  {id:'n83',name:'猿飞日斩「火影继承人」',rank:'A'},
+  {id:'n84',name:'宇智波鼬',rank:'A'},
+  {id:'n85',name:'宇智波鼬「新春限定」',rank:'A'},
+  {id:'n86',name:'宇智波佐助「须佐能乎」',rank:'A'},
+  {id:'n87',name:'宇智波佐助「万花筒写轮眼」',rank:'A'},
+  {id:'n88',name:'宇智波佐助「侠隐江湖」',rank:'A'},
+  {id:'n89',name:'日向宁次「忍界大战」',rank:'A'},
+  {id:'n90',name:'日向雏田「最终章」',rank:'A'},
+  {id:'n91',name:'长十郎「六代目水影」',rank:'A'},
+  {id:'n92',name:'神秘面具男「忍者之路」',rank:'A'},
+  {id:'n93',name:'李洛克「忍界大战」',rank:'A'},
+  {id:'n94',name:'黑土「博人传」',rank:'A'},
+  {id:'n95',name:'千手扉间「漂泊武士」',rank:'A'},
+  {id:'n96',name:'春野樱「百豪」',rank:'A'},
+  {id:'n97',name:'神农「羁绊」',rank:'A'},
+  {id:'n98',name:'土台「忍界大战」',rank:'A'},
+  {id:'n99',name:'加藤断',rank:'A'},
+  {id:'n100',name:'宇智波泉奈',rank:'A'},
+  {id:'n101',name:'艾「青年」',rank:'A'},
+  {id:'n102',name:'波风水门「青年」',rank:'A'},
+  {id:'n103',name:'长门「青年」',rank:'A'},
+  {id:'n104',name:'迪达拉「秽土转生」',rank:'A'},
+  {id:'n105',name:'大蛇丸「晓」',rank:'A'},
+  {id:'n106',name:'奇拉比',rank:'A'},
+  {id:'n107',name:'奇拉比「忍界大战」',rank:'A'},
+  {id:'n108',name:'漩涡鸣人「仙人模式」',rank:'A'},
+  {id:'n109',name:'漩涡鸣人「九尾查克拉」',rank:'A'},
+  {id:'n110',name:'旗木卡卡西「万花筒写轮眼」',rank:'A'},
+  {id:'n111',name:'旗木卡卡西「忍界大战」',rank:'A'},
+  {id:'n112',name:'旗木卡卡西「幻之真容」',rank:'A'},
+  {id:'n113',name:'宇智波止水',rank:'A'},
+  {id:'n114',name:'宇智波止水「新春限定」',rank:'A'},
+  {id:'n115',name:'药师兜「半蛇斗篷」',rank:'A'},
+  {id:'n116',name:'照美冥「五代目水影」',rank:'A'},
+  {id:'n117',name:'绝',rank:'A'},
+  {id:'n118',name:'宇智波带土「漂泊浪客」',rank:'A'},
+  {id:'n119',name:'宇智波带土「暴怒」',rank:'A'},
+  {id:'n120',name:'卑留呼「火之意志继承者」',rank:'A'},
+  {id:'n121',name:'佩恩·六道「漂泊浪客」',rank:'A'},
+  {id:'n122',name:'猿飞木叶丸「博人传」',rank:'A'},
+  {id:'n123',name:'秋道丁次「忍界大战」',rank:'A'},
+  {id:'n124',name:'千代「近松十人卫」',rank:'A'},
+  {id:'n125',name:'巳月「仙人模式」',rank:'A'},
+  {id:'n126',name:'迈特凯「青春爆炸」',rank:'A'},
+  {id:'n127',name:'角都「晓·北」',rank:'A'},
+  {id:'n128',name:'照美冥',rank:'A'},
+  {id:'n129',name:'长十郎',rank:'A'},
+  {id:'n130',name:'黑土',rank:'A'},
+  {id:'n131',name:'青',rank:'A'},
+  {id:'n132',name:'角都',rank:'A'},
+
+  // ===== B级 n133 ~ n149 =====
+  {id:'n133',name:'宇智波佐助「疾风传」',rank:'B'},
+  {id:'n134',name:'漩涡鸣人「疾风传」',rank:'B'},
+  {id:'n135',name:'春野樱「疾风传」',rank:'B'},
+  {id:'n136',name:'旗木卡卡西「疾风传」',rank:'B'},
+  {id:'n137',name:'日向宁次「疾风传」',rank:'B'},
+  {id:'n138',name:'李洛克「疾风传」',rank:'B'},
+  {id:'n139',name:'天天「疾风传」',rank:'B'},
+  {id:'n140',name:'犬冢牙「疾风传」',rank:'B'},
+  {id:'n141',name:'油女志乃「疾风传」',rank:'B'},
+  {id:'n142',name:'奈良鹿丸「疾风传」',rank:'B'},
+  {id:'n143',name:'秋道丁次「疾风传」',rank:'B'},
+  {id:'n144',name:'山中井野「疾风传」',rank:'B'},
+  {id:'n145',name:'日向雏田「疾风传」',rank:'B'},
+  {id:'n146',name:'犬冢牙「忍界大战」',rank:'B'},
+  {id:'n147',name:'油女志乃「忍界大战」',rank:'B'},
+  {id:'n148',name:'次郎坊',rank:'B'},
+  {id:'n149',name:'君麻吕「咒印」',rank:'B'},
+
+  // ===== C级 n150 ~ n162 =====
+  {id:'n150',name:'漩涡鸣人',rank:'C'},
+  {id:'n151',name:'宇智波佐助',rank:'C'},
+  {id:'n152',name:'春野樱',rank:'C'},
+  {id:'n153',name:'旗木卡卡西',rank:'C'},
+  {id:'n154',name:'洛克李',rank:'C'},
+  {id:'n155',name:'日向宁次',rank:'C'},
+  {id:'n156',name:'天天',rank:'C'},
+  {id:'n157',name:'犬冢牙',rank:'C'},
+  {id:'n158',name:'油女志乃',rank:'C'},
+  {id:'n159',name:'奈良鹿丸',rank:'C'},
+  {id:'n160',name:'秋道丁次',rank:'C'},
+  {id:'n161',name:'山中井野',rank:'C'},
+  {id:'n162',name:'日向雏田',rank:'C'}
+];
+
+const DEFAULT_SCROLLS = [
+  {id:'s1',name:'土遁·土流枪',type:'土遁'},
+  {id:'s2',name:'土遁·岩落',type:'土遁'},
+  {id:'s3',name:'土遁·地动',type:'土遁'},
+  {id:'s4',name:'土遁·土柱爆',type:'土遁'},
+  {id:'s5',name:'水遁·水乱波',type:'水遁'},
+  {id:'s6',name:'水遁·水牙弹',type:'水遁'},
+  {id:'s7',name:'水遁·水贻拿原',type:'水遁'},
+  {id:'s8',name:'水遁·水冲波',type:'水遁'},
+  {id:'s9',name:'水遁·水龙卷',type:'水遁'},
+  {id:'s10',name:'火遁·鬼灯笼',type:'火遁'},
+  {id:'s11',name:'火遁·豪炎矢',type:'火遁'},
+  {id:'s12',name:'火遁·鼠毛玉',type:'火遁'},
+  {id:'s13',name:'火遁·裂炎弹',type:'火遁'},
+  {id:'s14',name:'火遁·凤仙火之术',type:'火遁'},
+  {id:'s15',name:'雷遁·雷电击',type:'雷遁'},
+  {id:'s16',name:'雷遁·地走',type:'雷遁'},
+  {id:'s17',name:'风遁·斩空破',type:'风遁'},
+  {id:'s18',name:'风遁·真空波',type:'风遁'},
+  {id:'s19',name:'风遁·真空玉',type:'风遁'},
+  {id:'s20',name:'风遁·压害',type:'风遁'},
+  {id:'s21',name:'风遁·风杀阵',type:'风遁'},
+  {id:'s22',name:'冰遁·冻雪',type:'冰遁'},
+  {id:'s23',name:'冰遁·燕吹雪',type:'冰遁'},
+  {id:'s24',name:'幻术·此处非之术',type:'幻术'},
+  {id:'s25',name:'幻术·黑暗行之术',type:'幻术'},
+  {id:'s26',name:'掌仙术·活',type:'掌仙术'},
+  {id:'s27',name:'禁术·阴愈伤灭（霸体）',type:'禁术'},
+  {id:'s28',name:'秘术·散',type:'秘术'},
+  {id:'s29',name:'封印术·五行封印',type:'封印术'},
+  {id:'s30',name:'封印术·除魔',type:'封印术'},
+  {id:'s31',name:'封印术·四肢重封印',type:'封印术'},
+  {id:'s32',name:'通灵·手里剑护身',type:'通灵'},
+  {id:'s33',name:'通灵·来去手里剑',type:'通灵'},
+  {id:'s34',name:'通灵·雷光剑化',type:'通灵'},
+  {id:'s35',name:'木遁·一字连柱',type:'木遁'},
+  {id:'s36',name:'木遁·水盾',type:'木遁'},
+  {id:'s37',name:'木遁·扦插之术',type:'木遁'},
+  {id:'s38',name:'时空间忍术',type:'忍术'},
+  {id:'s39',name:'影分身之术',type:'忍术'},
+  {id:'s40',name:'手里剑影分身',type:'忍术'},
+  {id:'s41',name:'毅力',type:'忍法帖'},
+  {id:'s42',name:'一叶障',type:'忍法帖'},
+  {id:'s43',name:'查克拉手术刀',type:'医疗'}
+];
+
+const DEFAULT_SUMMONS = [
+  {id:'t1',name:'忍犬',skill:'忍犬大军'},
+  {id:'t2',name:'蛤蟆吉',skill:'蛤蟆水铁炮'},
+  {id:'t3',name:'蓝蛇',skill:'蓝色毒沼'},
+  {id:'t4',name:'忍龟',skill:'忍龟土流壁'},
+  {id:'t5',name:'镰鼬',skill:'镰鼬转转舞'},
+  {id:'t6',name:'猿魔',skill:'猿魔乱舞'},
+  {id:'t7',name:'蛤蟆仙人',skill:'幻术蛤蟆临唱'},
+  {id:'t8',name:'山椒鱼',skill:'山椒鱼剧毒'},
+  {id:'t9',name:'蜃楼',skill:'蜃楼大水瀑'},
+  {id:'t10',name:'蛞蝓',skill:'蛞蝓治愈术'},
+  {id:'t11',name:'乌鸦',skill:'乌鸦袭杀'},
+  {id:'t12',name:'梦貘',skill:'梦貘吞噬'},
+  {id:'t13',name:'鲨鱼',skill:'鲨鱼撕咬'},
+  {id:'t14',name:'熊猫',skill:'4秒霸体'},
+  {id:'t15',name:'二尾',skill:'火鼠玉'},
+  {id:'t16',name:'螃蟹',skill:'减速50%'},
+  {id:'t17',name:'变色龙',skill:'隐身'},
+  {id:'t18',name:'万蛇',skill:'全屏反手'},
+  {id:'t19',name:'大象',skill:'大象冲撞'},
+  {id:'t20',name:'守鹤',skill:'风遁砂漠'},
+  {id:'t21',name:'老鹰',skill:'高空俯冲'},
+  {id:'t22',name:'蜈蚣',skill:'毒液喷射'},
+  {id:'t23',name:'蛤蟆龙',skill:'水铁炮连发'},
+  {id:'t24',name:'蛤蟆力',skill:'蛤蟆油弹'}
+];
+
+/* ==================== BP 流程 ==================== */
+const steps = [
+  {team:'blue', type:'ban', count:1, label:'蓝方禁用第1名忍者'},
+  {team:'red',  type:'ban', count:1, label:'红方禁用第1名忍者'},
+  {team:'blue', type:'ban', count:1, label:'蓝方禁用第2名忍者'},
+  {team:'red',  type:'ban', count:1, label:'红方禁用第2名忍者'},
+  {team:'blue', type:'pick', count:1, label:'蓝方选择第1名忍者'},
+  {team:'red',  type:'pick', count:2, label:'红方选择2名忍者（依次点击）'},
+  {team:'blue', type:'pick', count:2, label:'蓝方选择2名忍者（依次点击）'},
+  {team:'red',  type:'pick', count:1, label:'红方选择第1名忍者'},
+  {team:'blue', type:'scroll', count:1, label:'蓝方选择秘卷1'},
+  {team:'red',  type:'scroll', count:1, label:'红方选择秘卷1'},
+  {team:'blue', type:'scroll', count:1, label:'蓝方选择秘卷2'},
+  {team:'red',  type:'scroll', count:1, label:'红方选择秘卷2'},
+  {team:'blue', type:'scroll', count:1, label:'蓝方选择秘卷3'},
+  {team:'red',  type:'scroll', count:1, label:'红方选择秘卷3'},
+  {team:'blue', type:'summon', count:1, label:'蓝方选择通灵1'},
+  {team:'red',  type:'summon', count:1, label:'红方选择通灵1'},
+  {team:'blue', type:'summon', count:1, label:'蓝方选择通灵2'},
+  {team:'red',  type:'summon', count:1, label:'红方选择通灵2'},
+  {team:'blue', type:'summon', count:1, label:'蓝方选择通灵3'},
+  {team:'red',  type:'summon', count:1, label:'红方选择通灵3'},
+  {team:'done', type:'done', count:0, label:'✅ BP完成！可保存记录或重置'}
+];
+
+/* ==================== 状态 ==================== */
+let customData = {ninjas:[], scrolls:[], summons:[]};
+let allNinjas = [], allScrolls = [], allSummons = [];
+let blueBans=[], redBans=[], bluePicks=[], redPicks=[];
+let blueScrolls=[], redScrolls=[], blueSummons=[], redSummons=[];
+let usedNinjas = new Set();
+let stepIndex = 0, stepSelected = 0;
+let bluePlayerName = '', redPlayerName = '';
+let currentTab = 'ninjas';
+let pendingImageData = '';
+
+/* === 头像相关状态 === */
+let avatarMap = {};              // { 'n1': 'data:image/...' 或 'images/xxx.png' }
+let avatarMode = false;          // 是否处于头像设置模式
+let currentAvatarItem = null;    // 当前编辑头像的卡片
+
+/* ==================== 工具函数 ==================== */
+function makeAvatar(name, type){
+  const safeName = String(name).replace(/[「」\[\]·\s]/g,'');
+  let ch = safeName.charAt(0) || '?';
+  ch = ch.replace(/["'<>&]/g, '?');
+  const colors = {ninja:'#1f4e8c', scroll:'#8a5a1a', summon:'#1a6b3a'};
+  const bg = colors[type] || '#444';
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+              '<rect width="64" height="64" rx="8" fill="' + bg + '"/>' +
+              '<text x="32" y="42" font-size="26" fill="#fff" text-anchor="middle" ' +
+              'font-family="sans-serif" font-weight="bold">' + ch + '</text></svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+function getItem(id, type){
+  if(type === 'ninja') return allNinjas.find(x => x.id === id);
+  if(type === 'scroll') return allScrolls.find(x => x.id === id);
+  return allSummons.find(x => x.id === id);
+}
+
+function getName(id, type){
+  const item = getItem(id, type);
+  return item ? item.name : id;
+}
+
+// 头像优先级：自定义头像 > 数据自带img > 生成占位图
+function getAvatarUrl(item, type){
+  return avatarMap[item.id] || item.img || makeAvatar(item.name, type);
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ==================== 数据加载 ==================== */
+function loadCustom(){
+  const s = localStorage.getItem('naruto_bp_custom');
+  if(s){ try { customData = JSON.parse(s); } catch(e){ customData = {ninjas:[],scrolls:[],summons:[]}; } }
+  if(!customData.ninjas) customData.ninjas = [];
+  if(!customData.scrolls) customData.scrolls = [];
+  if(!customData.summons) customData.summons = [];
+}
+function saveCustom(){
+  try { localStorage.setItem('naruto_bp_custom', JSON.stringify(customData)); }
+  catch(e){ alert('本地存储空间不足，请减少自定义图片数量或压缩图片尺寸'); }
+}
+function loadAvatars(){
+  const s = localStorage.getItem('naruto_bp_avatars');
+  try { avatarMap = s ? JSON.parse(s) : {}; } catch(e){ avatarMap = {}; }
+}
+function saveAvatars(){
+  try { localStorage.setItem('naruto_bp_avatars', JSON.stringify(avatarMap)); }
+  catch(e){ alert('头像存储空间不足！建议使用图片相对路径（如 images/xxx.png），或压缩图片尺寸'); }
+}
+function mergeData(){
+  allNinjas = [...DEFAULT_NINJAS, ...customData.ninjas];
+  allScrolls = [...DEFAULT_SCROLLS, ...customData.scrolls];
+  allSummons = [...DEFAULT_SUMMONS, ...customData.summons];
+}
+
+/* ==================== 渲染 ==================== */
+function render(){
+  const st = document.getElementById('status');
+  const step = steps[stepIndex] || steps[steps.length-1];
+  if(!avatarMode) st.textContent = step.label;
+
+  if(!avatarMode){
+    if(step.type === 'ban' || step.type === 'pick'){
+      if(currentTab !== 'ninjas') switchTab('ninjas', true);
+    } else if(step.type === 'scroll'){
+      if(currentTab !== 'scrolls') switchTab('scrolls', true);
+    } else if(step.type === 'summon'){
+      if(currentTab !== 'summons') switchTab('summons', true);
+    }
+  }
+
+  updateTeamPanels();
+  renderPool();
+}
+
+function updateTeamPanels(){
+  function fill(elId, ids, type, cls){
+    const el = document.getElementById(elId);
+    el.innerHTML = ids.map(id => {
+      const item = getItem(id, type);
+      if(!item) return '';
+      const img = getAvatarUrl(item, type);
+      const fb = makeAvatar(item.name, type);
+      return '<div class="mini-card ' + cls + '" title="' + esc(item.name) + '">' +
+             '<img src="' + esc(img) + '" onerror="this.onerror=null;this.src=\'' + fb + '\'">' +
+             '</div>';
+    }).join('');
+  }
+  fill('blueBansGrid', blueBans, 'ninja', 'ban');
+  fill('bluePicksGrid', bluePicks, 'ninja', 'pick-blue');
+  fill('blueScrollsGrid', blueScrolls, 'scroll', 'pick-blue');
+  fill('blueSummonsGrid', blueSummons, 'summon', 'pick-blue');
+  fill('redBansGrid', redBans, 'ninja', 'ban');
+  fill('redPicksGrid', redPicks, 'ninja', 'pick-red');
+  fill('redScrollsGrid', redScrolls, 'scroll', 'pick-red');
+  fill('redSummonsGrid', redSummons, 'summon', 'pick-red');
+}
+
+function switchTab(tab, silent){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  document.getElementById('rankFilter').style.display = (tab === 'ninjas') ? '' : 'none';
+  if(!silent) renderPool();
+}
+
+function renderPool(){
+  const tab = currentTab;
+  const search = document.getElementById('search').value.toLowerCase().trim();
+  const rank = document.getElementById('rankFilter').value;
+
+  let data = tab === 'ninjas' ? allNinjas : (tab === 'scrolls' ? allScrolls : allSummons);
+  if(tab === 'ninjas' && rank) data = data.filter(x => x.rank === rank);
+  if(search) data = data.filter(x => x.name.toLowerCase().includes(search));
+
+  const type = tab === 'ninjas' ? 'ninja' : (tab === 'scrolls' ? 'scroll' : 'summon');
+  const grid = document.getElementById('poolGrid');
+
+  if(data.length === 0){
+    grid.innerHTML = '<div style="color:#8b949e;padding:20px;text-align:center;grid-column:1/-1">没有匹配结果</div>';
+    return;
+  }
+
+  grid.innerHTML = data.map(item => {
+    let cls = 'card', badges = '', disabled = false;
+
+    if(type === 'ninja'){
+      if(usedNinjas.has(item.id)){
+        cls += ' used';
+        disabled = avatarMode ? false : true;  // 头像模式下即使已用也可点
+        if(blueBans.includes(item.id)) badges = '<div class="badge ban">蓝禁</div>';
+        else if(redBans.includes(item.id)) badges = '<div class="badge ban">红禁</div>';
+        else if(bluePicks.includes(item.id)) badges = '<div class="badge blue">蓝选</div>';
+        else if(redPicks.includes(item.id)) badges = '<div class="badge red">红选</div>';
+      }
+    } else if(type === 'scroll'){
+      if(blueScrolls.includes(item.id)) badges += '<div class="badge blue">蓝</div>';
+      if(redScrolls.includes(item.id)) badges += '<div class="badge red">红</div>';
+    } else {
+      if(blueSummons.includes(item.id)) badges += '<div class="badge blue">蓝</div>';
+      if(redSummons.includes(item.id)) badges += '<div class="badge red">红</div>';
+    }
+
+    if(avatarMode) cls += ' avatar-mode';
+
+    const img = getAvatarUrl(item, type);
+    const fb = makeAvatar(item.name, type);
+    const sub = item.rank || item.type || item.skill || '';
+    const click = disabled ? '' : 'onclick="onCardClick(\'' + item.id + '\',\'' + type + '\')"';
+
+    return '<div class="' + cls + '" ' + click + '>' +
+           '<div class="thumb"><img src="' + esc(img) + '" onerror="this.onerror=null;this.src=\'' + fb + '\'"></div>' +
+           '<div class="name">' + esc(item.name) + '</div>' +
+           '<div class="rank">' + esc(sub) + '</div>' +
+           badges +
+           '</div>';
+  }).join('');
+}
+
+/* ==================== 点击卡片 ==================== */
+function onCardClick(id, type){
+  // 头像模式：打开头像设置弹窗
+  if(avatarMode){
+    openAvatarModal(id, type);
+    return;
+  }
+
+  // 正常 BP 流程
+  if(stepIndex >= steps.length) return;
+  const step = steps[stepIndex];
+  if(step.type === 'done') return;
+  const team = step.team, ct = step.type;
+
+  if(type === 'ninja' && ct !== 'ban' && ct !== 'pick') return;
+  if(type === 'scroll' && ct !== 'scroll') return;
+  if(type === 'summon' && ct !== 'summon') return;
+
+  if(type === 'ninja' && usedNinjas.has(id)) return;
+  if(type === 'scroll'){
+    if(team === 'blue' && blueScrolls.includes(id)) return;
+    if(team === 'red' && redScrolls.includes(id)) return;
+  }
+  if(type === 'summon'){
+    if(team === 'blue' && blueSummons.includes(id)) return;
+    if(team === 'red' && redSummons.includes(id)) return;
+  }
+
+  if(ct === 'ban'){
+    if(team === 'blue') blueBans.push(id); else redBans.push(id);
+    usedNinjas.add(id);
+  } else if(ct === 'pick'){
+    if(team === 'blue') bluePicks.push(id); else redPicks.push(id);
+    usedNinjas.add(id);
+  } else if(ct === 'scroll'){
+    if(team === 'blue') blueScrolls.push(id); else redScrolls.push(id);
+  } else if(ct === 'summon'){
+    if(team === 'blue') blueSummons.push(id); else redSummons.push(id);
+  }
+
+  stepSelected++;
+  if(stepSelected >= step.count){
+    stepIndex++;
+    stepSelected = 0;
+  }
+  render();
+}
+
+/* ==================== 头像模式 ==================== */
+function toggleAvatarMode(){
+  avatarMode = !avatarMode;
+  const btn = document.getElementById('avatarModeBtn');
+  btn.classList.toggle('active', avatarMode);
+  btn.textContent = avatarMode ? '✅ 头像模式' : '🖼 设置头像';
+  const st = document.getElementById('status');
+  if(avatarMode){
+    st.textContent = '🖼 头像模式：点击任意卡片设置头像（不再触发BP）';
+    st.style.color = '#f0c040';
+  } else {
+    st.textContent = steps[stepIndex]?.label || '准备开始';
+    st.style.color = '#58a6ff';
+  }
+  renderPool();
+}
+
+function openAvatarModal(id, type){
+  const item = getItem(id, type);
+  if(!item) return;
+  currentAvatarItem = {id, type, name: item.name};
+
+  document.getElementById('avatarItemInfo').textContent =
+    '🎯 ' + item.name + '（' + (type === 'ninja' ? '忍者' : type === 'scroll' ? '秘卷' : '通灵') + '）';
+
+  // 显示当前头像
+  const current = avatarMap[id] || item.img || '';
+  const preview = document.getElementById('avatarPreview');
+  if(current){
+    preview.src = current;
+    preview.style.display = '';
+  } else {
+    preview.style.display = 'none';
+    preview.src = '';
+  }
+  preview.dataset.dataUrl = current;
+
+  document.getElementById('avatarFile').value = '';
+  document.getElementById('avatarUrl').value = '';
+
+  document.getElementById('avatarModal').classList.add('show');
+}
+
+function closeAvatarModal(){
+  document.getElementById('avatarModal').classList.remove('show');
+  currentAvatarItem = null;
+}
+
+function previewAvatar(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const preview = document.getElementById('avatarPreview');
+    preview.src = ev.target.result;
+    preview.style.display = '';
+    preview.dataset.dataUrl = ev.target.result;
+    document.getElementById('avatarUrl').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewAvatarUrl(url){
+  if(!url) return;
+  const preview = document.getElementById('avatarPreview');
+  preview.src = url;
+  preview.style.display = '';
+  preview.dataset.dataUrl = url;
+  document.getElementById('avatarFile').value = '';
+}
+
+function saveAvatar(){
+  if(!currentAvatarItem) return;
+  const preview = document.getElementById('avatarPreview');
+  const dataUrl = preview.dataset.dataUrl;
+  if(!dataUrl){
+    alert('请先上传图片或填写图片URL');
+    return;
+  }
+  avatarMap[currentAvatarItem.id] = dataUrl;
+  saveAvatars();
+  closeAvatarModal();
+  render();
+}
+
+function clearAvatar(){
+  if(!currentAvatarItem) return;
+  if(!confirm('清除「' + currentAvatarItem.name + '」的头像？')) return;
+  delete avatarMap[currentAvatarItem.id];
+  saveAvatars();
+  closeAvatarModal();
+  render();
+}
+
+/* ==================== 选手名字 ==================== */
+function setPlayerName(team, name){
+  if(team === 'blue') bluePlayerName = name.trim();
+  else redPlayerName = name.trim();
+  updatePlayerDisplay();
+}
+
+function updatePlayerDisplay(){
+  document.getElementById('blueTitle').textContent =
+    bluePlayerName ? '蓝方 · ' + bluePlayerName : '蓝方';
+  document.getElementById('redTitle').textContent =
+    redPlayerName ? '红方 · ' + redPlayerName : '红方';
+}
+
+/* ==================== BP 历史记录 ==================== */
+function getBPHistory(){
+  const s = localStorage.getItem('naruto_bp_history');
+  try { return s ? JSON.parse(s) : []; } catch(e){ return []; }
+}
+
+function saveBPHistory(){
+  const total = blueBans.length + redBans.length + bluePicks.length +
+                redPicks.length + blueScrolls.length + redScrolls.length +
+                blueSummons.length + redSummons.length;
+  if(total === 0){ alert('还没有BP数据可保存'); return; }
+  const record = {
+    id: 'bp_' + Date.now(),
+    time: new Date().toLocaleString('zh-CN', {hour12:false}),
+    blueName: bluePlayerName || '蓝方',
+    redName: redPlayerName || '红方',
+    blueBans: [...blueBans], redBans: [...redBans],
+    bluePicks: [...bluePicks], redPicks: [...redPicks],
+    blueScrolls: [...blueScrolls], redScrolls: [...redScrolls],
+    blueSummons: [...blueSummons], redSummons: [...redSummons]
+  };
+  const history = getBPHistory();
+  history.unshift(record);
+  if(history.length > 50) history.length = 50;
+  try { localStorage.setItem('naruto_bp_history', JSON.stringify(history)); }
+  catch(e){ alert('存储空间不足，无法保存历史记录'); return; }
+  renderHistory();
+  alert('✅ BP记录已保存');
+}
+
+function renderHistory(){
+  const history = getBPHistory();
+  const container = document.getElementById('historyList');
+  if(history.length === 0){
+    container.innerHTML = '<div style="color:#8b949e;padding:16px;font-size:13px;text-align:center">暂无BP记录</div>';
+    return;
+  }
+  container.innerHTML = history.map(r => {
+    const blueBanStr = r.blueBans.map(id => getName(id,'ninja')).join('、') || '无';
+    const redBanStr = r.redBans.map(id => getName(id,'ninja')).join('、') || '无';
+    return '<div class="history-item">' +
+      '<div class="history-time">' + esc(r.time) + '</div>' +
+      '<div class="history-names">' + esc(r.blueName) + ' vs ' + esc(r.redName) + '</div>' +
+      '<div class="history-summary">蓝禁：' + esc(blueBanStr) + '<br>红禁：' + esc(redBanStr) + '</div>' +
+      '<div class="history-actions">' +
+        '<button onclick="loadHistory(\'' + r.id + '\')">回放</button>' +
+        '<button class="danger" onclick="deleteHistory(\'' + r.id + '\')">删除</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function loadHistory(id){
+  const r = getBPHistory().find(x => x.id === id);
+  if(!r) return;
+  if(!confirm('加载 ' + r.blueName + ' vs ' + r.redName + ' 的BP记录？当前BP将被覆盖。')) return;
+
+  blueBans = [...r.blueBans]; redBans = [...r.redBans];
+  bluePicks = [...r.bluePicks]; redPicks = [...r.redPicks];
+  blueScrolls = [...r.blueScrolls]; redScrolls = [...r.redScrolls];
+  blueSummons = [...r.blueSummons]; redSummons = [...r.redSummons];
+  bluePlayerName = r.blueName === '蓝方' ? '' : r.blueName;
+  redPlayerName = r.redName === '红方' ? '' : r.redName;
+
+  usedNinjas = new Set([...blueBans, ...redBans, ...bluePicks, ...redPicks]);
+  stepIndex = steps.length - 1;
+  stepSelected = 0;
+
+  document.getElementById('blueNameInput').value = bluePlayerName;
+  document.getElementById('redNameInput').value = redPlayerName;
+  updatePlayerDisplay();
+  render();
+}
+
+function deleteHistory(id){
+  if(!confirm('删除这条记录？')) return;
+  const history = getBPHistory().filter(x => x.id !== id);
+  localStorage.setItem('naruto_bp_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory(){
+  if(!confirm('确定清空所有BP历史记录？此操作不可恢复。')) return;
+  localStorage.removeItem('naruto_bp_history');
+  renderHistory();
+}
+
+/* ==================== 重置 ==================== */
+function resetBP(){
+  if(!confirm('确定重置当前BP？')) return;
+  blueBans=[]; redBans=[]; bluePicks=[]; redPicks=[];
+  blueScrolls=[]; redScrolls=[]; blueSummons=[]; redSummons=[];
+  usedNinjas = new Set();
+  stepIndex = 0; stepSelected = 0;
+  render();
+}
+
+/* ==================== 添加自定义内容 ==================== */
+function openAddModal(){
+  document.getElementById('addModal').classList.add('show');
+  document.getElementById('addName').value = '';
+  pendingImageData = '';
+  const prev = document.getElementById('imagePreview');
+  prev.style.display = 'none';
+  prev.src = '';
+  document.getElementById('addImage').value = '';
+  updateAddForm();
+}
+
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('show');
+}
+
+function updateAddForm(){
+  const type = document.getElementById('addType').value;
+  const extra = document.getElementById('addExtra');
+  if(type === 'ninja'){
+    extra.innerHTML = '<label>等级<select id="addRank"><option>S</option><option>A</option><option>B</option><option>C</option></select></label>';
+  } else if(type === 'scroll'){
+    extra.innerHTML = '<label>类型<input id="addScrollType" placeholder="如：火遁、禁术"></label>';
+  } else {
+    extra.innerHTML = '<label>技能<input id="addSummonSkill" placeholder="如：猿魔乱舞"></label>';
+  }
+}
+
+function previewImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingImageData = ev.target.result;
+    const prev = document.getElementById('imagePreview');
+    prev.src = pendingImageData;
+    prev.style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function addItem(){
+  const type = document.getElementById('addType').value;
+  const name = document.getElementById('addName').value.trim();
+  if(!name){ alert('请输入名称'); return; }
+
+  const id = 'custom_' + type + '_' + Date.now();
+  const item = {id, name, img: pendingImageData || ''};
+
+  if(type === 'ninja'){
+    item.rank = document.getElementById('addRank').value;
+    customData.ninjas.push(item);
+  } else if(type === 'scroll'){
+    item.type = (document.getElementById('addScrollType')?.value || '自定义').trim();
+    customData.scrolls.push(item);
+  } else {
+    item.skill = (document.getElementById('addSummonSkill')?.value || '').trim();
+    customData.summons.push(item);
+  }
+
+  saveCustom();
+  mergeData();
+  closeAddModal();
+  render();
+  alert('✅ 已添加：' + name);
+}
+
+/* ==================== 导入导出 ==================== */
+function exportData(){
+  const data = {
+    version: 2,
+    exportTime: new Date().toISOString(),
+    custom: customData,
+    history: getBPHistory(),
+    avatars: avatarMap
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'naruto_bp_data_' + Date.now() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(data.custom){
+        customData = data.custom;
+        if(!customData.ninjas) customData.ninjas = [];
+        if(!customData.scrolls) customData.scrolls = [];
+        if(!customData.summons) customData.summons = [];
+        saveCustom();
+      }
+      if(data.history && Array.isArray(data.history)){
+        localStorage.setItem('naruto_bp_history', JSON.stringify(data.history));
+      }
+      if(data.avatars && typeof data.avatars === 'object'){
+        avatarMap = data.avatars;
+        saveAvatars();
+      }
+      mergeData();
+      render();
+      renderHistory();
+      alert('✅ 导入成功');
+    } catch(err){
+      alert('导入失败：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+/* ==================== 初始化 ==================== */
+window.addEventListener('load', function(){
+  loadCustom();
+  loadAvatars();
+  mergeData();
+  updateAddForm();
+  switchTab('ninjas', true);
+  render();
+  renderHistory();
+  updatePlayerDisplay();
+});
+
+// 点击遮罩关闭弹窗
+document.getElementById('addModal').addEventListener('click', function(e){
+  if(e.target === this) closeAddModal();
+});
+document.getElementById('avatarModal').addEventListener('click', function(e){
+  if(e.target === this) closeAvatarModal();
+});
+</script>
+</body>
+</html>
